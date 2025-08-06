@@ -30,12 +30,12 @@ private final ClientService clientService;
     public ClientController(ClientService clientService) {
         this.clientService = clientService;
     }
-//@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<Clients> getAllClients() {
         return clientService.getAllClients();
     }
-//@PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+@PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getClientById(@PathVariable Long id) {
@@ -43,14 +43,14 @@ private final ClientService clientService;
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    //@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 
     @PostMapping
     public ResponseEntity<?> createClient(@Valid @RequestBody Clients client) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(clientService.createClient(client));
     }
-    //@PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+@PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateClient(@Valid @PathVariable Long id, @RequestBody Clients client) {
@@ -60,7 +60,7 @@ private final ClientService clientService;
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
-    //@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteClient(@PathVariable Long id) {

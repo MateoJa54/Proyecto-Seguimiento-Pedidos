@@ -9,9 +9,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 public class OrdersApplication {
 
 	public static void main(String[] args) {
-		System.out.println("🚀 Aplicación Products iniciando...");
+		System.out.println(" Aplicación Products iniciando...");
 		SpringApplication.run(OrdersApplication.class, args);
-		System.out.println("Aplicación Products ejecutándose correctamente.");
+		System.out.println("Aplicación Orders ejecutándose correctamente.");
 	}
 
 }

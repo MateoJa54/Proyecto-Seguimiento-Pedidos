@@ -1,37 +1,36 @@
 package com.example.cliente.client.model;
+
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "clients")
-
 public class Clients {
-@Id
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "Name is required")
-    @Size(max = 100)
+    @Size(max = 100, message = "Name must not exceed 100 characters")
     private String name;
 
     @NotBlank(message = "Email is required")
-    @Email(message = "Must be a valid email")
-    @Column(unique = true)
+    @Email(message = "Must be a valid email address")
+    @Size(max = 150)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Size(max = 20)
+    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be exactly 10 digits")
+    @Column(length = 10)
     private String phone;
 
-    @Size(max = 200)
+    @Size(max = 200, message = "Address must not exceed 200 characters")
     private String address;
 
-    // Empty constructor required by JPA
     public Clients() {
     }
 
-    // Constructor with all fields
     public Clients(Long id, String name, String email, String phone, String address) {
         this.id = id;
         this.name = name;
@@ -40,7 +39,8 @@ public class Clients {
         this.address = address;
     }
 
-    // Getters and setters
+    // Getters and Setters
+
     public Long getId() {
         return id;
     }
@@ -81,7 +81,6 @@ public class Clients {
         this.address = address;
     }
 
-    // toString (optional)
     @Override
     public String toString() {
         return "Client{" +
@@ -92,5 +91,4 @@ public class Clients {
                 ", address='" + address + '\'' +
                 '}';
     }
-
 }
