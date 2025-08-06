@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # PostgreSQL para cliente-service
+  postgres:
+    image: postgres:latest
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: clientedb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - shared-net
+
+  # MySQL para orders-service
+  orders-db:
+    image: mysql:latest
+    container_name: orders-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin123
+      MYSQL_DATABASE: orders
+    ports:
+      - "3308:3306"
+    volumes:
+      - orders-db-data:/var/lib/mysql
+    networks:
+      - shared-net
+
+  # Microservicio cliente (se construye desde Dockerfile)
+  cliente-service:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: cliente-ms
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: clientedb
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    networks:
+      - shared-net
+
+  # Microservicio orders (se construye desde Dockerfile)
+  orders-service:
+    build:
+      context: ./orders
+      dockerfile: Dockerfile
+    container_name: orders-ms
+    depends_on:
+      - orders-db
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: orders-db
+      DB_PORT: 3306
+      DB_DATABASE: orders
+      DB_USER: root
+      DB_PASSWORD: admin123
+      PORT: 8083
+    networks:
+      - shared-net
+
+volumes:
+  pgdata:
+  orders-db-data:
+
+networks:
+  shared-net:
+    driver: bridge

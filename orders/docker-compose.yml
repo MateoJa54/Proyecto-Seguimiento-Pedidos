@@ -1,0 +1,38 @@
+services:
+  orders-db:
+    image: mysql:latest
+    container_name: orders-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin123
+      MYSQL_DATABASE: orders
+    ports:
+      - "3308:3306"   # Puerto local 3308 mapeado a puerto 3306 dentro del contenedor
+    volumes:
+      - orders-db-data:/var/lib/mysql
+    networks:
+      - orders-network
+
+  orders-service:
+    build: .
+    container_name: orders-service
+    depends_on:
+      - orders-db
+    environment:
+      DB_HOST: orders-db      # Aquí debe ser el nombre del servicio, no localhost ni 3308
+      DB_PORT: 3306           # Puerto interno del contenedor MySQL
+      DB_DATABASE: orders
+      DB_USER: root
+      DB_PASSWORD: admin123
+      PORT: 8083
+    ports:
+      - "8083:8083"
+    networks:
+      - orders-network
+
+volumes:
+  orders-db-data:
+
+networks:
+  orders-network:
+    driver: bridge
