@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest  # Última versión estable oficial
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: clientedb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - clientenet
+
+  cliente-service:
+    image: cliente-service
+    container_name: cliente-ms
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: clientedb
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    networks:
+      - clientenet
+
+volumes:
+  pgdata:
+
+networks:
+  clientenet:
+    driver: bridge
