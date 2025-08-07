@@ -29,7 +29,7 @@
 	<properties>
 		<java.version>17</java.version>
 	</properties>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -71,7 +71,13 @@
 		<version>8.0.33</version>      <!-- o la última 8.0.x disponible -->
 		<scope>runtime</scope>
 		</dependency>
-	</dependencies>
+	
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-autoconfigure</artifactId>
+</dependency>
+
+ </dependencies>
 
 	<build>
 		<plugins>

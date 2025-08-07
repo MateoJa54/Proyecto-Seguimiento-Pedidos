@@ -1,4 +1,3 @@
-// src/main/java/com/example/authservice/config/AuthorizationServerConfig.java
 package com.example.auth.config;
 
 import java.security.KeyPair;
@@ -10,6 +9,7 @@ import java.util.UUID;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -36,26 +36,24 @@ import com.nimbusds.jose.proc.SecurityContext;
 @EnableWebSecurity
 public class AuthorizationServerConfig {
 
-    /** 1) Repositorio de clientes OAuth2 en BBDD */
     @Bean
     public RegisteredClientRepository registeredClientRepository(JdbcOperations jdbcOperations) {
+        // JDBC repo por defecto (solo JdbcOperations)
         return new JdbcRegisteredClientRepository(jdbcOperations);
     }
 
-    /** 2) Servicios de autorización y consentimiento JDBC */
     @Bean
     public OAuth2AuthorizationService authorizationService(JdbcOperations jdbcOperations,
-            RegisteredClientRepository clients) {
+                                                           RegisteredClientRepository clients) {
         return new JdbcOAuth2AuthorizationService(jdbcOperations, clients);
     }
 
     @Bean
     public OAuth2AuthorizationConsentService consentService(JdbcOperations jdbcOperations,
-            RegisteredClientRepository clients) {
+                                                            RegisteredClientRepository clients) {
         return new JdbcOAuth2AuthorizationConsentService(jdbcOperations, clients);
     }
 
-    /** 3) JWK + JwtDecoder */
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
         try {
@@ -77,26 +75,21 @@ public class AuthorizationServerConfig {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
 
-    /** 4) SecurityFilterChain para endpoints OAuth2 del Auth Server */
     @Bean
     @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-        // Aplica la configuración por defecto (/oauth2/**, /.well-known/**, token endpoints…)
+    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-
-        // Cuando el navegador pide HTML y no está autenticado → redirigir a /login
         http.exceptionHandling(ex -> ex
-            .defaultAuthenticationEntryPointFor(
-                new LoginUrlAuthenticationEntryPoint("/login"),
-                new MediaTypeRequestMatcher(org.springframework.http.MediaType.TEXT_HTML)
-            )
+          .defaultAuthenticationEntryPointFor(
+              new LoginUrlAuthenticationEntryPoint("/login"),
+              new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+          )
         );
         return http.build();
     }
 
-    /** 5) Ajustes del servidor (URIs, etc.) */
     @Bean
-    public AuthorizationServerSettings authorizationServerSettings() {
+    public AuthorizationServerSettings authServerSettings() {
         return AuthorizationServerSettings.builder().build();
     }
 }
