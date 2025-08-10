@@ -19,7 +19,7 @@ services:
     depends_on:
       - orders-db
     environment:
-      DB_HOST: orders-db      # Aquí debe ser el nombre del servicio, no localhost ni 3308
+      DB_HOST: orders-db      # Nombre del servicio MySQL
       DB_PORT: 3306           # Puerto interno del contenedor MySQL
       DB_DATABASE: orders
       DB_USER: root
@@ -27,6 +27,18 @@ services:
       PORT: 8083
     ports:
       - "8083:8083"
+    networks:
+      - orders-network
+
+  oauth2-server:
+    build:
+      context: ./oauth2
+      dockerfile: Dockerfile
+    container_name: oauth2-server
+    ports:
+      - "9000:9000"
+    environment:
+      PORT: 9000
     networks:
       - orders-network
 
