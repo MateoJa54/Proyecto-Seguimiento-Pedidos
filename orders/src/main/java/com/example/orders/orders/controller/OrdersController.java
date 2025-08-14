@@ -40,13 +40,13 @@ public class OrdersController {
         this.trackingClient = trackingClient;
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping
     public List<Order> getAllOrders() {
         return orderService.getAllOrders();
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrderById(@PathVariable Long id) {
         return orderService.getOrderById(id)
@@ -54,7 +54,7 @@ public class OrdersController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createOrder(@Valid @RequestBody Order order) {
         try {
@@ -86,7 +86,7 @@ public class OrdersController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateOrder(@Valid @PathVariable Long id, @RequestBody Order order) {
         try {

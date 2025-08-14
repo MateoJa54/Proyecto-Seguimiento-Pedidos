@@ -1,0 +1,37 @@
+<div class="card" style="max-width:820px;margin:0 auto;">
+    <h2 style="margin-top:0">Crear nuevo pedido</h2>
+
+    <form (ngSubmit)="submit()" #orderForm="ngForm">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+                <label class="label">Producto</label>
+                <input class="input" name="producto" [(ngModel)]="model.producto" required placeholder="Ej: Camiseta" />
+            </div>
+
+            <div>
+                <label class="label">Fecha</label>
+                <input class="input" type="date" name="fecha" [(ngModel)]="model.fecha" required />
+            </div>
+
+            <div style="grid-column:1 / -1;">
+                <label class="label">Cliente</label>
+                <select class="select" name="clienteId" [(ngModel)]="model.clienteId" required>
+          <option [ngValue]="null">-- Selecciona cliente --</option>
+          <option *ngFor="let c of clients" [ngValue]="c.id">{{ c.id }} — {{ c.name }}</option>
+        </select>
+            </div>
+
+            <div style="grid-column:1 / -1;">
+                <label class="label">Dirección de entrega</label>
+                <input class="input" name="direccionEntrega" [(ngModel)]="model.direccionEntrega" required placeholder="Calle, número, ciudad" />
+            </div>
+        </div>
+
+        <div *ngIf="errorMessage" style="color:var(--danger);margin-top:10px">{{ errorMessage }}</div>
+
+        <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
+            <a routerLink="/orders" class="btn ghost">Cancelar</a>
+            <button class="btn" type="submit" [disabled]="orderForm.invalid || saving">{{ saving ? 'Guardando…' : 'Crear pedido' }}</button>
+        </div>
+    </form>
+</div>

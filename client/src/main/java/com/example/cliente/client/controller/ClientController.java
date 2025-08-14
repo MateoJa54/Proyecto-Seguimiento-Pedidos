@@ -35,7 +35,7 @@ private final ClientService clientService;
     public List<Clients> getAllClients() {
         return clientService.getAllClients();
     }
-@PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getClientById(@PathVariable Long id) {
@@ -43,14 +43,14 @@ private final ClientService clientService;
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 
     @PostMapping
     public ResponseEntity<?> createClient(@Valid @RequestBody Clients client) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(clientService.createClient(client));
     }
-@PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
+@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateClient(@Valid @PathVariable Long id, @RequestBody Clients client) {

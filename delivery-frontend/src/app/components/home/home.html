@@ -1,0 +1,35 @@
+<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div>
+            <h1 style="margin:0 0 6px 0">Panel de control</h1>
+            <p style="margin:0;color:var(--muted)">Busca pedidos rápidamente o navega por las secciones.</p>
+        </div>
+
+        <div style="min-width:280px;">
+            <label class="label">Consulta rápida por número de pedido</label>
+            <div style="display:flex;gap:8px">
+                <input class="input" type="number" [(ngModel)]="orderIdInput" placeholder="ID del pedido" />
+                <button class="btn" (click)="go(orderIdInput)">Buscar</button>
+            </div>
+        </div>
+    </div>
+
+    <hr style="margin:16px 0; border:none; border-top:1px solid #eef2f7" />
+
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <a routerLink="/orders" class="card" style="flex:1;min-width:200px;text-decoration:none;color:inherit;">
+            <h3 style="margin:0 0 8px 0">Pedidos</h3>
+            <p style="margin:0;color:var(--muted)">Crear, editar y consultar pedidos.</p>
+        </a>
+
+        <a routerLink="/clients" class="card" style="flex:1;min-width:200px;text-decoration:none;color:inherit;">
+            <h3 style="margin:0 0 8px 0">Clientes</h3>
+            <p style="margin:0;color:var(--muted)">Gestiona los clientes (Postgres).</p>
+        </a>
+
+        <a routerLink="/unauthorized" class="card" style="flex:1;min-width:200px;text-decoration:none;color:inherit;">
+            <h3 style="margin:0 0 8px 0">Acceso</h3>
+            <p style="margin:0;color:var(--muted)">Simula el flujo de autorizaciones según rol.</p>
+        </a>
+    </div>
+</div>

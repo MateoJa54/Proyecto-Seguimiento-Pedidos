@@ -1,9 +1,8 @@
 version: '3.8'
 
 services:
-  # PostgreSQL para cliente-service
   postgres:
-    image: postgres:latest
+    image: postgres:15-alpine
     container_name: postgres-db
     environment:
       POSTGRES_DB: clientedb
@@ -15,19 +14,30 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - shared-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d clientedb || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-  # Servidor OAuth2 Authorization Server
   oauth2-server:
     build:
       context: ./oauth2
       dockerfile: Dockerfile
     container_name: oauth2-server
+    environment:
+      # IMPORTANTE: el issuer que el server devolverá en discovery (AJUSTA si quieres otro)
+      AUTH_ISSUER: http://localhost:9000
     ports:
       - "9000:9000"
     networks:
       - shared-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/.well-known/openid-configuration || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
-  # Microservicio cliente (protegido)
   cliente-service:
     build:
       context: ./client
@@ -45,13 +55,14 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       PORT: 8081
-      JWT_ISSUER_URI: http://oauth2-server:9000
+      JWT_ISSUER_URI: http://host.docker.internal:9000   # dentro de docker el issuer es el service-name
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - shared-net
 
-  # MySQL para orders-service
   orders-db:
-    image: mysql:latest
+    image: mysql:8.0
     container_name: orders-mysql
     environment:
       MYSQL_ROOT_PASSWORD: admin123
@@ -62,8 +73,12 @@ services:
       - orders-db-data:/var/lib/mysql
     networks:
       - shared-net
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -padmin123 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
-  # Microservicio orders (protegido)
   orders-service:
     build:
       context: ./orders
@@ -71,7 +86,7 @@ services:
     container_name: orders-ms
     depends_on:
       - orders-db
-      - oauth2-server   # <-- opcional pero recomendable, si quieres que espere a que oauth2 arranque
+      - oauth2-server
     ports:
       - "8083:8083"
     environment:
@@ -81,13 +96,67 @@ services:
       DB_USER: root
       DB_PASSWORD: admin123
       PORT: 8083
-      JWT_ISSUER_URI: http://oauth2-server:9000
+      JWT_ISSUER_URI: http://host.docker.internal:9000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - shared-net
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - shared-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  tracking-ms:
+    build:
+      context: ./tracking-service
+      dockerfile: Dockerfile
+    container_name: tracking-ms
+    depends_on:
+      - redis
+      - oauth2-server
+    ports:
+      - "8084:8084"
+    environment:
+      PORT: 8084
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_ISSUER_URI: http://host.docker.internal:9000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - shared-net
+
+
+  frontend:
+    build:
+      context: ./delivery-frontend
+      dockerfile: Dockerfile
+    container_name: frontend-ms
+    depends_on:
+      - oauth2-server
+      - cliente-service
+      - orders-service
+      - tracking-ms
+    ports:
+      - "4200:80"        # nginx dentro del container escucha 80
     networks:
       - shared-net
 
 volumes:
   pgdata:
   orders-db-data:
+  redis-data:
 
 networks:
   shared-net:

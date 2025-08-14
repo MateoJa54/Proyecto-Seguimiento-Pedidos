@@ -1,0 +1,20 @@
+.indicator {
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 999px;
+}
+
+.indicator.fresh {
+    background: var(--success);
+    color: white;
+}
+
+.indicator.stale {
+    background: var(--warning);
+    color: #222;
+}
+
+.indicator.outdated {
+    background: var(--danger);
+    color: white;
+}

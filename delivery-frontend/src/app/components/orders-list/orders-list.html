@@ -1,0 +1,45 @@
+<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <h2 style="margin:0">Pedidos</h2>
+            <p style="margin:0;color:var(--muted)">Listado de pedidos registrados (MySQL).</p>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn" *ngIf="isAdminOrCliente()" (click)="create()">+ Nuevo pedido</button>
+            <button class="btn ghost" (click)="load()">Actualizar</button>
+        </div>
+    </div>
+
+    <div *ngIf="loading" style="margin-top:12px">Cargando…</div>
+    <div *ngIf="error" style="color:var(--danger);margin-top:12px">{{ error }}</div>
+
+    <div *ngIf="!loading">
+        <table class="table" style="margin-top:12px">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Fecha</th>
+                    <th>Producto</th>
+                    <th>Cliente</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let o of orders">
+                    <td>{{ o.id }}</td>
+                    <td>{{ o.fecha }}</td>
+                    <td>{{ o.producto }}</td>
+                    <td>{{ o.clienteId }}</td>
+                    <td>{{ o.estado }}</td>
+                    <td>
+                        <button class="btn small" (click)="view(o.id)">Ver</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div *ngIf="orders?.length === 0" style="margin-top:12px;color:var(--muted)">No hay pedidos registrados.</div>
+    </div>
+</div>

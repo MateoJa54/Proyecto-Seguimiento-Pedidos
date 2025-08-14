@@ -1,0 +1,38 @@
+<!-- src/app/app.html -->
+<header class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
+    <div style="display:flex;gap:12px;align-items:center;">
+        <div style="width:46px;height:46px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">
+            DS
+        </div>
+        <div>
+            <div style="font-weight:700;font-size:1.05rem">Delivery System</div>
+            <div style="font-size:0.85rem;color:var(--muted)">Seguimiento de pedidos - microservicios</div>
+        </div>
+    </div>
+
+    <nav style="display:flex;gap:8px;align-items:center;">
+        <a routerLink="/" class="btn ghost">Inicio</a>
+        <a routerLink="/orders" class="btn ghost">Pedidos</a>
+        <a routerLink="/clients" class="btn ghost">Clientes</a>
+
+        <ng-container *ngIf="!auth.isLoggedIn(); else logged">
+            <a routerLink="/login" class="btn">Ingresar</a>
+        </ng-container>
+        <ng-template #logged>
+            <div style="display:flex;gap:8px;align-items:center">
+                <div style="font-size:0.9rem;color:var(--muted)">
+                    Hola, <strong style="color:var(--text)">{{ auth.getIdentityClaims()?.username || auth.getIdentityClaims()?.sub }}</strong>
+                </div>
+                <button class="btn small" (click)="logout()">Cerrar sesión</button>
+            </div>
+        </ng-template>
+    </nav>
+</header>
+
+<main class="container">
+    <router-outlet></router-outlet>
+</main>
+
+<footer style="text-align:center;padding:20px 0;color:var(--muted);margin-top:28px;">
+    © {{ currentYear }} Delivery System — Proyecto Seguimiento de Pedidos
+</footer>

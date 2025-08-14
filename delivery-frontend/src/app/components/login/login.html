@@ -1,0 +1,14 @@
+<!-- login.html -->
+<div class="login-wrap">
+    <div class="login-card">
+        <h2>Iniciar sesión</h2>
+        <p>Accede con tu cuenta usando OAuth2</p>
+
+        <button class="btn" (click)="onLogin()">Iniciar sesión con OAuth</button>
+
+        <div *ngIf="auth.isAuthenticated()" class="logged">
+            <p>Autenticado ✅</p>
+            <button (click)="auth.logout()">Cerrar sesión</button>
+        </div>
+    </div>
+</div>

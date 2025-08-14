@@ -1,0 +1,50 @@
+<div *ngIf="order" class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <h2 style="margin:0">Pedido #{{ order.id }}</h2>
+            <div style="color:var(--muted);font-size:0.95rem">Cliente: {{ order.clienteId }} — Producto: {{ order.producto }}</div>
+        </div>
+        <div>
+            <span class="indicator" [ngClass]="staleClass()">{{ staleClass().toUpperCase() }}</span>
+        </div>
+    </div>
+
+    <hr style="margin:12px 0;border:none;border-top:1px solid #eef2f7" />
+    <div class="row">
+        <div class="col card" style="padding:12px;">
+            <div class="kv"><strong>Estado (DB)</strong>
+                <div>{{ order.estado }}</div>
+            </div>
+            <div class="kv"><strong>Fecha</strong>
+                <div>{{ order.fecha }}</div>
+            </div>
+            <div class="kv"><strong>Dirección</strong>
+                <div>{{ order.direccionEntrega }}</div>
+            </div>
+        </div>
+
+        <div class="col card" style="padding:12px;">
+            <h4 style="margin-top:0">Tracking (Redis)</h4>
+
+            <div *ngIf="tracking; else notfound">
+                <div class="kv"><strong>Estado (Redis)</strong>
+                    <div>{{ tracking.status }}</div>
+                </div>
+                <div class="kv"><strong>Última actualización</strong>
+                    <div>{{ tracking.timestamp || tracking.lastUpdated || tracking.date }}</div>
+                </div>
+            </div>
+            <ng-template #notfound>
+                <div style="color:var(--muted)">No hay información rápida en Redis para este pedido.</div>
+            </ng-template>
+        </div>
+    </div>
+
+    <div style="margin-top:14px">
+        <a routerLink="/orders" class="btn ghost">Volver</a>
+    </div>
+</div>
+
+<div *ngIf="!order" class="card">
+    <p>Cargando pedido…</p>
+</div>

@@ -6,22 +6,28 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
-
+import org.springframework.http.HttpMethod;
 @Configuration
-@EnableMethodSecurity
-
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
   @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/orders/**").authenticated()
+                // GET: ADMIN o USER (lectura)
+                .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyRole("ADMIN", "USER")
+                // POST/PUT/DELETE: solo ADMIN
+                .requestMatchers(HttpMethod.POST, "/api/orders/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/orders/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasRole("ADMIN")
+                // resto
                 .anyRequest().permitAll()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
             );
+
         return http.build();
     }
 
