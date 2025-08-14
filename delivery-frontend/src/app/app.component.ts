@@ -18,9 +18,11 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     // inicializa el cliente OAuth (carga discovery y check de login)
-    this.auth.init().catch(err => {
-      console.error('Auth init failed', err);
-    });
+    this.auth.init().then(()=> {
+  console.log('AccessToken:', this.auth.getAccessToken());
+  console.log('IdentityClaims:', this.auth.getIdentityClaims());
+});
+
   }
 
   logout(): void {

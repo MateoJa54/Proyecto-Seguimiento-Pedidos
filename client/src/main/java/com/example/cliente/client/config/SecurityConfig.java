@@ -64,8 +64,6 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
             "http://localhost:4200",
             "http://127.0.0.1:4200"
-            // si ejecutas el frontend dentro de docker desde otro host, añade por ejemplo:
-            // "http://host.docker.internal:4200" o "http://frontend" según tu setup
         ));
 
         // Métodos permitidos

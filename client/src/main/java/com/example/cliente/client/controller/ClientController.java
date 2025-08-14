@@ -1,6 +1,7 @@
 package com.example.cliente.client.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,56 +20,100 @@ import com.example.cliente.client.model.Clients;
 import com.example.cliente.client.services.ClientService;
 
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
+import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8082") // Cambia esto al origen del frontend
-// Permite solicitudes desde el frontend en el puerto 8082
+// permitir el origen del frontend (ajusta si tu frontend está en otro host/puerto)
+@CrossOrigin(origins = {"http://localhost:4200", "http://127.0.0.1:4200"})
 @RequestMapping("/api/clients")
 public class ClientController {
-private final ClientService clientService;
+    private final ClientService clientService;
 
     public ClientController(ClientService clientService) {
         this.clientService = clientService;
     }
-@PreAuthorize("hasRole('ADMIN')")
+
+    // SOLO ADMIN puede listar todos
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<Clients> getAllClients() {
         return clientService.getAllClients();
     }
-@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 
+    // ADMIN o USER puede ver por id
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getClientById(@PathVariable Long id) {
-        return clientService.getClientById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<Clients> maybe = clientService.getClientById(id);
+        return maybe.map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
     }
-@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 
+    // en ClientController (cliente-service)
+@PreAuthorize("hasAnyRole('ADMIN','USER')") // cualquiera autenticado puede usarlo (o restringe si quieres)
+@GetMapping("/by-username/{username}")
+public ResponseEntity<?> getByUsername(@PathVariable String username) {
+    return clientService.findByUsername(username)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+}
+
+    // ADMIN crea clientes
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createClient(@Valid @RequestBody Clients client) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(clientService.createClient(client));
-    }
-@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateClient(@Valid @PathVariable Long id, @RequestBody Clients client) {
         try {
-            return ResponseEntity.ok(clientService.updateClient(id, client));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            Clients created = clientService.createClient(client);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-@PreAuthorize("hasRole('ADMIN')")
 
+    // ADMIN o USER puede actualizar: si quieres que USER solo actualice su propio cliente
+    // añade comprobación adicional (comparar username con Authentication)
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateClient(@Valid @PathVariable Long id, @RequestBody Clients client, Authentication auth) {
+        try {
+            // Si es USER: asegurarse que actualiza su propio cliente
+            if (auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                // no es admin -> comprobar que el username del cliente coincide con auth.getName()
+                Optional<Clients> maybe = clientService.getClientById(id);
+                if (maybe.isEmpty()) return ResponseEntity.notFound().build();
+                if (!maybe.get().getUsername().equals(auth.getName())) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Users can only update their own record"));
+                }
+            }
+            Clients updated = clientService.updateClient(id, client);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // SOLO ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteClient(@PathVariable Long id) {
         try {
             clientService.deleteClient(id);
             return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
+    }
+
+    // endpoint debug: ver información sobre el auth (útil para tests/curl)
+    // lo ponemos en /api/debug/me para que no choque con /api/clients
+    @GetMapping("/debug/me")
+    public Map<String, Object> me(Authentication auth) {
+        return Map.of(
+            "principal", auth.getPrincipal(),
+            "name", auth.getName(),
+            "authenticated", auth.isAuthenticated(),
+            "authorities", auth.getAuthorities()
+        );
     }
 }

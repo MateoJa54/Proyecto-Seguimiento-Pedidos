@@ -27,16 +27,18 @@ public class Clients {
 
     @Size(max = 200, message = "Address must not exceed 200 characters")
     private String address;
-
+    @Column(unique = true)
+    private String username;
     public Clients() {
     }
 
-    public Clients(Long id, String name, String email, String phone, String address) {
+    public Clients(Long id, String name, String email, String phone, String address, String username) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.address = address;
+        this.username = username;
     }
 
     // Getters and Setters
@@ -90,5 +92,12 @@ public class Clients {
                 ", phone='" + phone + '\'' +
                 ", address='" + address + '\'' +
                 '}';
+    }
+
+    public String getUsername() {
+        return username;
+    }
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

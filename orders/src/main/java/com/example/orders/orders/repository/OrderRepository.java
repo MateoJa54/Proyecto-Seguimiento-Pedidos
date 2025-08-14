@@ -1,11 +1,9 @@
 package com.example.orders.orders.repository;
 
 import java.util.List;
-
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.orders.orders.model.Order;
 
-public interface OrderRepository extends CrudRepository<Order, Long> {
-List<Order> findByClienteId(Long clienteId);
-
+public interface OrderRepository extends JpaRepository<Order, Long> {
+    List<Order> findByClienteId(Long clienteId);
 }

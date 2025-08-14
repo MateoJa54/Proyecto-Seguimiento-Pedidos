@@ -55,7 +55,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       PORT: 8081
-      JWT_ISSUER_URI: http://host.docker.internal:9000   # dentro de docker el issuer es el service-name
+      JWT_JWKS_URI: http://oauth2-server:9000/oauth2/jwks   # dentro de docker el issuer es el service-name
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
@@ -96,7 +96,7 @@ services:
       DB_USER: root
       DB_PASSWORD: admin123
       PORT: 8083
-      JWT_ISSUER_URI: http://host.docker.internal:9000
+      JWT_JWKS_URI: http://oauth2-server:9000/oauth2/jwks 
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
